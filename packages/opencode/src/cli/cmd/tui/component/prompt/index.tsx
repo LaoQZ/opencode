@@ -137,6 +137,8 @@ export function Prompt(props: PromptProps) {
   const [auto, setAuto] = createSignal<AutocompleteRef>()
   const currentProviderLabel = createMemo(() => local.model.parsed().provider)
   const hasRightContent = createMemo(() => Boolean(props.right))
+  const [autoaccept] = kv.signal<"none" | "edit">("permission_auto_accept", "edit")
+  const hasFooterRight = createMemo(() => hasRightContent() || autoaccept() === "edit")
 
   function promptModelWarning() {
     toast.show({
@@ -1268,9 +1270,14 @@ export function Prompt(props: PromptProps) {
                   )}
                 </Show>
               </box>
-              <Show when={hasRightContent()}>
+              <Show when={hasFooterRight()}>
                 <box flexDirection="row" gap={1} alignItems="center">
-                  {props.right}
+                  <Show when={hasRightContent()}>{props.right}</Show>
+                  <Show when={autoaccept() === "edit"}>
+                    <text>
+                      <span style={{ fg: theme.warning }}>autoedit</span>
+                    </text>
+                  </Show>
                 </box>
               </Show>
             </box>
